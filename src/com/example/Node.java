@@ -1,15 +1,12 @@
 package com.example;
 
 public class Node {
+    public char character;
+    public Node left;
+    public Node right;
 
-    char letter;
-    String morseCode;
-    Node left;
-    Node right;
-
-    public Node(char letter, String morseCode) {
-        this.letter = letter;
-        this.morseCode = morseCode;
+    public Node(char character) {
+        this.character = character;
         this.left = null;
         this.right = null;
     }

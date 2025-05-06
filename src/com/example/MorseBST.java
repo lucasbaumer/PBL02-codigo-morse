@@ -3,112 +3,150 @@ package com.example;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MorseBST {
-
     private Node root;
+    private Map<Character, String> charToMorseMap;
 
     public MorseBST() {
-        root = null;
+        root = new Node(' ');
+        charToMorseMap = new HashMap<>();
+        initializeMorseTree();
     }
 
-    // insere uma letra e o código Morse
-    public void insert(char letter, String morseCode) {
-        root = insertRec(root, letter, morseCode, 0);
+    private void initializeMorseTree() {
+        // Alfabeto Morse completo
+        addNode('E', ".");
+        addNode('T', "-");
+        addNode('I', "..");
+        addNode('A', ".-");
+        addNode('N', "-.");
+        addNode('M', "--");
+        addNode('S', "...");
+        addNode('U', "..-");
+        addNode('R', ".-.");
+        addNode('W', ".--");
+        addNode('D', "-..");
+        addNode('K', "-.-");
+        addNode('G', "--.");
+        addNode('O', "---");
+        addNode('H', "....");
+        addNode('V', "...-");
+        addNode('F', "..-.");
+        addNode('L', ".-..");
+        addNode('P', ".--.");
+        addNode('J', ".---");
+        addNode('B', "-...");
+        addNode('X', "-..-");
+        addNode('C', "-.-.");
+        addNode('Y', "-.--");
+        addNode('Z', "--..");
+        addNode('Q', "--.-");
+        addNode('5', ".....");
+        addNode('4', "....-");
+        addNode('3', "...--");
+        addNode('2', "..---");
+        addNode('1', ".----");
+        addNode('6', "-....");
+        addNode('7', "--...");
+        addNode('8', "---..");
+        addNode('9', "----.");
+        addNode('0', "-----");
+        addNode(' ', "/");
     }
 
-    // Método recursivo para inserir no BST
-    private Node insertRec(Node root, char letter, String morseCode, int index) {
-        // ve se percorreu todo o nó
-        if (index >= morseCode.length()) {
-            if (root == null) {
-                root = new Node(letter, morseCode);
-            } else {
-                root.letter = letter;
+    public void addNode(char character, String morseCode) {
+        Node current = root;
+        for (int i = 0; i < morseCode.length(); i++) {
+            if (morseCode.charAt(i) == '.') {
+                if (current.left == null) {
+                    current.left = new Node(' ');
+                }
+                current = current.left;
+            } else if (morseCode.charAt(i) == '-') {
+                if (current.right == null) {
+                    current.right = new Node(' ');
+                }
+                current = current.right;
             }
-            return root;
         }
-
-        // Se o nó atual é nulo, cria um nó intermediário com letra ' ' (espaço)
-        if (root == null) {
-            root = new Node(' ', "");
-        }
-
-        char morseChar = morseCode.charAt(index);
-        if (morseChar == '.') {
-            root.left = insertRec(root.left, letter, morseCode, index + 1);
-        } else if (morseChar == '-') {
-            root.right = insertRec(root.right, letter, morseCode, index + 1);
-        }
-        return root;
+        current.character = character;
+        charToMorseMap.put(character, morseCode);
     }
 
-    // Calcula a altura da árvore
-    public int getHeight() {
-        return getHeight(root);
-    }
-
-    private int getHeight(Node node) {
-        if (node == null) {
-            return 0;
+    public String encode(String word) {
+        StringBuilder morse = new StringBuilder();
+        for (char c : word.toUpperCase().toCharArray()) {
+            if (charToMorseMap.containsKey(c)) {
+                morse.append(charToMorseMap.get(c)).append(" ");
+            } else if (c == ' ') {
+                morse.append("/ ");
+            }
         }
-        return 1 + Math.max(getHeight(node.left), getHeight(node.right));
+        return morse.toString().trim();
     }
 
-    // desenha a árvore
+    public String decode(String morseCode) {
+        StringBuilder decoded = new StringBuilder();
+        String[] codes = morseCode.split(" ");
+        for (String code : codes) {
+            if (code.equals("/")) {
+                decoded.append(" ");
+            } else {
+                decoded.append(findCharacter(root, code, 0));
+            }
+        }
+        return decoded.toString();
+    }
+
+    private char findCharacter(Node node, String code, int index) {
+        if (index == code.length()) {
+            return node.character;
+        }
+        char direction = code.charAt(index);
+        if (direction == '.' && node.left != null) {
+            return findCharacter(node.left, code, index + 1);
+        } else if (direction == '-' && node.right != null) {
+            return findCharacter(node.right, code, index + 1);
+        }
+        return ' ';
+    }
+
     public void drawTree(Canvas canvas) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(2);
-        // Começa o desenho da árvore na raiz
-        drawNode(gc, root, canvas.getWidth() / 2, 40, canvas.getWidth() / 6, 1);
+        drawNode(gc, root, canvas.getWidth() / 2, 50, canvas.getWidth() / 4);
     }
 
-    // Desenha nó e os filhos
-    private void drawNode(GraphicsContext gc, Node node, double x, double y, double xOffset, int level) {
-        if (node == null) {
-            return;
-        }
+    private void drawNode(GraphicsContext gc, Node node, double x, double y, double xOffset) {
+        if (node == null) return;
 
+        gc.setFill(Color.WHITE);
+        gc.fillOval(x - 15, y - 15, 30, 30);
         gc.setStroke(Color.BLACK);
-        gc.strokeOval(x - 15, y - 15, 30, 30); // Desenha o círculo com raio 15
-        gc.strokeText(String.valueOf(node.letter == ' ' ? ' ' : node.letter), x - 5, y + 5);
+        gc.strokeOval(x - 15, y - 15, 30, 30);
+        gc.strokeText(String.valueOf(node.character), x - 5, y + 5);
 
         if (node.left != null) {
-            double newX = x - xOffset;
-            double newY = y + 100;
-            gc.strokeLine(x, y + 15, newX, newY - 15); // Linha para filho à esquerda
-            drawNode(gc, node.left, newX, newY, xOffset / 2, level + 1);
+            gc.strokeLine(x, y + 15, x - xOffset, y + 65);
+            drawNode(gc, node.left, x - xOffset, y + 80, xOffset / 2);
         }
-
         if (node.right != null) {
-            double newX = x + xOffset;
-            double newY = y + 100;
-            gc.strokeLine(x, y + 15, newX, newY - 15); // Linha para filho à direita
-            drawNode(gc, node.right, newX, newY, xOffset / 2, level + 1);
+            gc.strokeLine(x, y + 15, x + xOffset, y + 65);
+            drawNode(gc, node.right, x + xOffset, y + 80, xOffset / 2);
         }
     }
 
-    // decodifica o código Morse em uma palavra
-    public String decode(String morseCode) {
-        StringBuilder decodedMessage = new StringBuilder();
-        Node currentNode = root;
+    public int calculateTreeHeight() {
+        return calculateHeight(root);
+    }
 
-        for (char morseChar : morseCode.toCharArray()) {
-            if (morseChar == '.') {
-                currentNode = currentNode.left;  // Mover para a esquerda
-            } else if (morseChar == '-') {
-                currentNode = currentNode.right; // Mover para a direita
-            }
-
-            // Se alcançamos um nó final (letra), adiciona a letra e reinicia a busca para o próximo caractere Morse
-            if (currentNode != null && currentNode.left == null && currentNode.right == null) {
-                decodedMessage.append(currentNode.letter);
-                currentNode = root;  // Reinicia a busca a partir da raiz
-            }
-        }
-
-        return decodedMessage.toString();
+    private int calculateHeight(Node node) {
+        if (node == null) return 0;
+        return 1 + Math.max(calculateHeight(node.left), calculateHeight(node.right));
     }
 }

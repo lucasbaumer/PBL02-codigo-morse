@@ -5,68 +5,34 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.stage.Stage;
+import java.util.Scanner;
 
 public class TreeVisualizer extends Application {
-
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Visualizador de Árvore Binária");
+        MorseBST morseTree = new MorseBST();
+        Scanner scanner = new Scanner(System.in);
 
-        MorseBST bst = new MorseBST();
+        System.out.println("Digite uma palavra para codificar em Morse:");
+        String inputWord = scanner.nextLine().toUpperCase();
 
-        bst.insert('A', ".-");
-        bst.insert('B', "-...");
-        bst.insert('C', "-.-.");
-        bst.insert('D', "-..");
-        bst.insert('E', ".");
-        bst.insert('F', "..-.");
-        bst.insert('G', "--.");
-        bst.insert('H', "....");
-        bst.insert('I', "..");
-        bst.insert('J', ".---");
-        bst.insert('K', "-.-");
-        bst.insert('L', ".-..");
-        bst.insert('M', "--");
-        bst.insert('N', "-.");
-        bst.insert('O', "---");
-        bst.insert('P', ".--.");
-        bst.insert('Q', "--.-");
-        bst.insert('R', ".-.");
-        bst.insert('S', "...");
-        bst.insert('T', "-");
-        bst.insert('U', "..-");
-        bst.insert('V', "...-");
-        bst.insert('W', ".--");
-        bst.insert('X', "-..-");
-        bst.insert('Y', "-.--");
-        bst.insert('Z', "--..");
-        bst.insert('0', "-----");
-        bst.insert('1', ".----");
-        bst.insert('2', "..---");
-        bst.insert('3', "...--");
-        bst.insert('4', "....-");
-        bst.insert('5', ".....");
-        bst.insert('6', "-....");
-        bst.insert('7', "--...");
-        bst.insert('8', "---..");
-        bst.insert('9', "----.");
+        String morseCode = morseTree.encode(inputWord);
+        System.out.println("Código Morse: " + morseCode);
 
-        int height = bst.getHeight();
-        int canvasHeight = 100 + height * 100;
-        int canvasWidth = Math.min((int) Math.pow(2, height) * 40, 1800);
+        String decodedWord = morseTree.decode(morseCode);
+        System.out.println("Palavra decodificada: " + decodedWord);
+
+        int treeHeight = morseTree.calculateTreeHeight();
+        int canvasWidth = Math.min((int) Math.pow(2, treeHeight) * 40, 1800);
+        int canvasHeight = treeHeight * 100 + 100;
 
         Canvas canvas = new Canvas(canvasWidth, canvasHeight);
-        bst.drawTree(canvas);
+        morseTree.drawTree(canvas);
 
-        Group root = new Group();
-        root.getChildren().add(canvas);
-
-        Scene scene = new Scene(root, canvasWidth, canvasHeight);
+        Group rootGroup = new Group(canvas);
+        Scene scene = new Scene(rootGroup, canvasWidth, canvasHeight);
+        primaryStage.setTitle("Árvore Binária de Código Morse");
         primaryStage.setScene(scene);
         primaryStage.show();
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }
